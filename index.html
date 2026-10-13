@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road to 1 Million Subs 🚀</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 30px 16px;
+    font-family: Arial, sans-serif;
+    background: #0b1020;
+    color: white;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 6vw, 42px);
+    margin-bottom: 10px;
+  }
+
+  header p {
+    color: #aab4d0;
+  }
+
+  .stats {
+    background: #151d33;
+    border: 1px solid #293552;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+
+  .stats-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .number {
+    color: #60a5fa;
+    font-size: 30px;
+    font-weight: bold;
+  }
+
+  .bar {
+    height: 12px;
+    background: #303a53;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 18px 0 10px;
+  }
+
+  .fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #a855f7);
+    transition: width 0.3s;
+  }
+
+  .progress-text {
+    color: #aab4d0;
+    font-size: 14px;
+  }
+
+  .milestone {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #151d33;
+    border: 1px solid #293552;
+    border-radius: 14px;
+    padding: 16px;
+    margin: 12px 0;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .milestone:hover {
+    border-color: #60a5fa;
+    transform: translateY(-2px);
+  }
+
+  .milestone.done {
+    border-color: #22c55e;
+    background: #102a28;
+  }
+
+  .milestone input {
+    width: 22px;
+    height: 22px;
+    accent-color: #22c55e;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .milestone .info {
+    flex: 1;
+  }
+
+  .milestone h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+  }
+
+  .milestone p {
+    margin: 0;
+    font-size: 13px;
+    color: #aab4d0;
+  }
+
+  .milestone.done h3 {
+    color: #86efac;
+  }
+
+  .emoji {
+    font-size: 26px;
+  }
+
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 17px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .reset {
+    background: #26314a;
+    color: white;
+  }
+
+  .reset:hover {
+    background: #394766;
+  }
+
+  .footer {
+    text-align: center;
+    color: #8490ad;
+    font-size: 13px;
+    margin-top: 28px;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <header>
+    <h1>🚀 Road to 1 Million!</h1>
+    <p>Every subscriber counts. Every milestone matters.</p>
+  </header>
+
+  <section class="stats">
+    <div class="stats-top">
+      <div>
+        <div style="color:#aab4d0">Milestones completed</div>
+        <div class="number" id="count">0 / 15</div>
+      </div>
+      <div class="emoji" id="trophy">🏆</div>
+    </div>
+
+    <div class="bar">
+      <div class="fill" id="fill"></div>
+    </div>
+
+    <div class="progress-text" id="progress">
+      0% complete — your journey starts here!
+    </div>
+  </section>
+
+  <div id="checklist"></div>
+
+  <button class="reset" id="reset">↻ Reset checklist</button>
+
+  <div class="footer">
+    Made for a future YouTube legend 💙<br>
+    Your progress saves automatically in this browser.
+  </div>
+</div>
+
+<script>
+const milestones = [
+  { n: 10, label: "First 10 Subscribers", emoji: "🌱" },
+  { n: 50, label: "50 Subscribers", emoji: "🎯" },
+  { n: 100, label: "100 Subscribers", emoji: "💯" },
+  { n: 500, label: "500 Subscribers", emoji: "🔥" },
+  { n: 1000, label: "1K Subscribers", emoji: "⭐" },
+  { n: 2500, label: "2.5K Subscribers", emoji: "🚀" },
+  { n: 5000, label: "5K Subscribers", emoji: "💎" },
+  { n: 10000, label: "10K Subscribers", emoji: "🏅" },
+  { n: 25000, label: "25K Subscribers", emoji: "👑" },
+  { n: 50000, label: "50K Subscribers", emoji: "⚡" },
+  { n: 100000, label: "100K Subscribers", emoji: "🥇" },
+  { n: 250000, label: "250K Subscribers", emoji: "🌟" },
+  { n: 500000, label: "500K Subscribers", emoji: "🏆" },
+  { n: 750000, label: "750K Subscribers", emoji: "💫" },
+  { n: 1000000, label: "1 MILLION SUBSCRIBERS!", emoji: "🎉" }
+];
+
+const storageKey = "subscriberMilestonesV1";
+const checklist = document.getElementById("checklist");
+
+let completed = {};
+
+try {
+  completed = JSON.parse(
+    localStorage.getItem(storageKey) || "{}"
+  );
+  if (!completed || typeof completed !== "object" ||
+      Array.isArray(completed)) {
+    completed = {};
+  }
+} catch {
+  completed = {};
+}
+
+function render() {
+  checklist.innerHTML = "";
+
+  milestones.forEach((milestone, index) => {
+    const label = document.createElement("label");
+    label.className = "milestone" +
+      (completed[index] ? " done" : "");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = Boolean(completed[index]);
+    checkbox.setAttribute(
+      "aria-label",
+      "Complete " + milestone.label
+    );
+
+    const info = document.createElement("div");
+    info.className = "info";
+
+    const heading = document.createElement("h3");
+    heading.textContent = milestone.label;
+
+    const description = document.createElement("p");
+    description.textContent = completed[index]
+      ? "Milestone unlocked! 🎉"
+      : "Keep going — you've got this!";
+
+    info.append(heading, description);
+
+    const emoji = document.createElement("span");
+    emoji.className = "emoji";
+    emoji.textContent = milestone.emoji;
+
+    label.append(checkbox, info, emoji);
+    checklist.append(label);
+
+    checkbox.addEventListener("change", () => {
+      completed[index] = checkbox.checked;
+
+      if (!checkbox.checked) {
+        delete completed[index];
+      }
+
+      try {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify(completed)
+        );
+      } catch {
+        alert("Couldn't save progress in this browser.");
+      }
+
+      render();
+    });
+  });
+
+  const total = milestones.length;
+  const done = milestones.filter(
+    (_, index) => Boolean(completed[index])
+  ).length;
+
+  const percent = Math.round((done / total) * 100);
+
+  document.getElementById("count").textContent =
+    `${done} / ${total}`;
+
+  document.getElementById("fill").style.width =
+    percent + "%";
+
+  document.getElementById("progress").textContent =
+    percent === 100
+      ? "100% complete — YOU DID IT! 🎉"
+      : `${percent}% complete — keep chasing your dream!`;
+
+  document.getElementById("trophy").textContent =
+    percent === 100 ? "🏆🎉" : "🏆";
+}
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (confirm("Reset all your completed milestones?")) {
+    completed = {};
+    localStorage.removeItem(storageKey);
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
